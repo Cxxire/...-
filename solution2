@@ -1,0 +1,70 @@
+To scrape the table from the website you mentioned (https://www.aastocks.com/tc/stocks/market/index/hk-index-con.aspx), you can use Python with the libraries `requests` and `BeautifulSoup`. Since you are using JupyterLab, you can run the following code in a notebook cell.
+
+**Note:**  
+- The table is dynamically generated with JavaScript, so `requests` alone may not get the table. For dynamic content, use `selenium` or `playwright` to render the page.
+- Below is a solution using `selenium` (which works well in JupyterLab 3).
+
+---
+
+### 1. Install Required Packages
+
+```python
+!pip install selenium webdriver-manager beautifulsoup4 pandas
+```
+
+---
+
+### 2. Scrape the Table
+
+```python
+from selenium import webdriver
+from selenium.webdriver.chrome.service import Service
+from webdriver_manager.chrome import ChromeDriverManager
+from bs4 import BeautifulSoup
+import pandas as pd
+import time
+
+# Set up Selenium WebDriver
+options = webdriver.ChromeOptions()
+options.add_argument('--headless')  # Run in headless mode (no browser UI)
+options.add_argument('--no-sandbox')
+options.add_argument('--disable-dev-shm-usage')
+
+driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=options)
+
+# Open the webpage
+url = "https://www.aastocks.com/tc/stocks/market/index/hk-index-con.aspx"
+driver.get(url)
+time.sleep(5)  # Wait for JS to render the table
+
+# Get page source and parse with BeautifulSoup
+soup = BeautifulSoup(driver.page_source, "html.parser")
+driver.quit()
+
+# Find the table by id
+table = soup.find("table", {"id": "tblTS2"})
+
+# Parse table into DataFrame
+df = pd.read_html(str(table))[0]
+df.head()
+```
+
+---
+
+### 3. Display or Save the Data
+
+```python
+# Display the first few rows
+print(df.head())
+
+# Save to CSV if needed
+df.to_csv("hk_index_table.csv", index=False)
+```
+
+---
+
+**Tips:**
+- If you want to extract more details (like links or images in the last column), you can further parse the HTML using BeautifulSoup.
+- If you run into issues with ChromeDriver, make sure your Chrome browser is up to date.
+
+Let me know if you want a version that extracts extra details (like the stock code links or chart images) or if you need a Playwright-based solution!
