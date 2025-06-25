@@ -1,0 +1,78 @@
+No problem! You can use Selenium with Microsoft Edge (Chromium-based) as well. Here’s how to do it in your Jupyter Lab environment:
+
+---
+
+## 1. Install Required Packages
+
+In a Jupyter cell, run:
+```python
+!pip install selenium msedge-selenium-tools webdriver-manager
+```
+
+---
+
+## 2. Download and Use Edge WebDriver
+
+- Make sure your Edge browser is up to date.
+- The script below uses `webdriver-manager` to automatically download the correct Edge WebDriver.
+
+---
+
+## 3. Selenium Script for Edge
+
+```python
+import os
+import time
+from selenium import webdriver
+from selenium.webdriver.edge.options import Options
+from selenium.webdriver.common.by import By
+from webdriver_manager.microsoft import EdgeChromiumDriverManager
+
+# Set download directory (change as needed)
+download_dir = os.path.abspath("downloads")
+os.makedirs(download_dir, exist_ok=True)
+
+# Set Edge options for automatic download
+edge_options = Options()
+edge_options.use_chromium = True
+edge_options.add_experimental_option("prefs", {
+    "download.default_directory": download_dir,
+    "download.prompt_for_download": False,
+    "download.directory_upgrade": True,
+    "safebrowsing.enabled": True
+})
+# edge_options.add_argument("--headless")  # Optional: run in headless mode
+
+# Start Edge driver
+driver = webdriver.Edge(EdgeChromiumDriverManager().install(), options=edge_options)
+
+# Open the page
+driver.get("https://www.aastocks.com/tc/stocks/market/index/hk-index-con.aspx")
+
+# Wait for the page to load
+time.sleep(3)
+
+# Find and click the Excel download button
+excel_button = driver.find_element(By.CLASS_NAME, "ts2_icon_excel")
+excel_button.click()
+
+# Wait for download to complete (adjust time as needed)
+time.sleep(5)
+
+# List downloaded files
+print("Downloaded files:", os.listdir(download_dir))
+
+driver.quit()
+```
+
+---
+
+## 4. Notes
+
+- The downloaded Excel file will be in the `downloads` folder in your current working directory.
+- If you have issues with headless mode and downloads, try running without `--headless`.
+- You can process the Excel file with pandas after downloading.
+
+---
+
+Let me know if you need help with any part of this process or want to automate further!
